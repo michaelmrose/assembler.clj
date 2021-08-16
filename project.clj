@@ -6,6 +6,7 @@
   :dependencies [
 				 [org.clojure/clojure "1.10.1"]
 				 [instaparse "1.4.10"]
+				 [superstring "3.0.0"]
 				 ]
   :main ^:skip-aot assembler.clj
   :target-path "target/%s"

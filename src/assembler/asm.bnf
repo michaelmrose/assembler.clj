@@ -1,0 +1,23 @@
+<S> = LINE*
+<LINE> = INSTRUCTION* LABEL? COMMENT? NL
+
+INSTRUCTION = CINSTRUCTION-SANS-JUMP | CINSTRUCTION-SANS-DEST | CINSTRUCTION-COMPLETE | AINSTRUCTION-LITERAL | AINSTRUCTION-SYMBOLIC
+
+AINSTRUCTION-LITERAL = <"@"> #"[0-9]+"
+AINSTRUCTION-SYMBOLIC = <"@"> #"[a-zA-Z][a-zA-Z0-9_-]+"
+
+CINSTRUCTION-SANS-JUMP = DEST COMP
+CINSTRUCTION-SANS-DEST = COMP <";"> JUMP
+CINSTRUCTION-COMPLETE  = DEST COMP <";"> JUMP
+
+	DEST = "AD" <"="> | "AMD" <"=">"AM" <"="> | "MD" <"="> | "M" <"="> | "D" <"="> | "A" <"=">
+
+	JUMP = "JGT" | "JEQ" | "JGE" | "JLT" | "JNE" | "JLE" | "JMP"
+
+	COMP = "0" | "1" | "-1"  | "!M" | "-M"| "M+1" | "M-1" | "!D" | "-D" | "D+1" | "D-1" | "!A" | "-A" | "A+1" | "A-1" |  "D+A" | "D-A" |"A-D" | "D&A" | "D|A" | "D+M" | "D-M" | "M-D" | "D&M" | "D|M"| "M" | "A" | "D"
+
+<COMMENT> = <#"//.*">
+
+LABEL = <"("> #"[a-zA-Z_-]+" <")">
+
+<NL> = <#"\n"> | <#"\r\n">
