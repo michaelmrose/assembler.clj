@@ -6,7 +6,7 @@
 
 (def label-map (atom {}))
 (def counter (atom 0))
-(def variable-allocation-counter (atom 0))
+(def variable-allocation-counter (atom 15))
 
 (defn parse-jump [s]
   (condp = s
@@ -104,7 +104,7 @@
 (defn transform-nodes [parse-tree]
   (insta/transform {
 					:AINSTRUCTION-LITERAL parse-literal-ainstruction
-					;; :AINSTRUCTION-SYMBOLIC parse-symbolic-aistruction
+					:AINSTRUCTION-SYMBOLIC parse-symbolic-aistruction
 					:CINSTRUCTION-COMPLETE parse-cinstruction
 					:DEST parse-dest
 					:COMP parse-comp
