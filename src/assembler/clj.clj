@@ -30,7 +30,6 @@
 	"AD" "110"
 	"AMD" 111))
 
-;; TODO fill out the rest of comp
 (defn parse-comp [s]
   (condp = s
 	"0" "0101010"
