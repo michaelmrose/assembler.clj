@@ -71,12 +71,14 @@
 	M=D
 
 	@target
-	MD=M+1 // WHAT THE ACTUAL FUCK
+	MD=M+1
 
 	@end_of_screen
-	D=M-D // WHAT THE ACTUAL FUCK
+	D=M-D
 	@WRITELOOP
 	D;JGT
+
+	// D;JGT=WRITELOOP this syntax makes sense to me
 
 	(INPUTLOOP)
 
