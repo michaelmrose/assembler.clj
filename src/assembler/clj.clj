@@ -66,13 +66,13 @@
 (defn parse-literal-ainstruction [s]
   (str/pad-left (Integer/toBinaryString (Integer. s)) 16 "0"))
 
-;; TODO THIS NEEDS TO ALLOCATE variables as needed
 (defn parse-symbolic-aistruction [s]
-							(parse-literal-ainstruction (@label-map s)))
+  (if-let [instruction-number (@label-map s) ]
+	(parse-literal-ainstruction instruction-number)
+	(parse-literal-ainstruction (swap! variable-allocation-counter inc))))
 
-;; I NEED TO FIND A WAY TO INCLUDE ZERO PADDING FOR WHEN
-;; DEST AND OR JUMP DON'T EXIST. PERHAPS CHECK IN THIS FUNCTION AND INSERT
-;; ZEROS
+(swap! variable-allocation-counter inc)
+
 (defn parse-cinstruction [& s]
   (str "111"(apply str s )))
 
@@ -87,12 +87,10 @@
 (defn parse-file [filename]
   (asm-parser (slurp filename)))
 
-;; TODO in grammer file add new cinstruction types and transform them into the complete
-;; cinstruction. Probably need to rename this.
-
 (defn build-label-map-and-preprocess [parse-tree]
   (reset! label-map {})
   (reset! counter 0)
+  (reset! variable-allocation-counter 15)
   (insta/transform {
 		:INSTRUCTION (fn [x] (swap! counter inc) x)
 		:LABEL (fn [x] (swap! label-map #(assoc % x (inc @counter))) nil )
@@ -120,4 +118,6 @@
    (build-label-map-and-preprocess)
    (filter identity)
    (transform-nodes)
+   ;; (str/join "\n")
+   ;; (spit "out")
    )
