@@ -74,7 +74,13 @@
 (defn parse-symbolic-aistruction [s]
   (if-let [instruction-number (@label-map s) ]
 	(parse-literal-ainstruction instruction-number)
-	(parse-literal-ainstruction (swap! variable-allocation-counter inc))))
+	(if-let [instruction-number (@variable-map s)]
+	  (parse-literal-ainstruction instruction-number)
+	  (do
+	  ;; Add to variable map so its found next time
+		(swap! variable-map (fn [x](assoc x s (swap! variable-allocation-counter inc) )))
+		(parse-literal-ainstruction(@variable-map s))
+		))))
 
 (swap! variable-allocation-counter inc)
 
