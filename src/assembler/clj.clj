@@ -8,6 +8,9 @@
 (def counter (atom 0))
 (def variable-allocation-counter (atom 15))
 
+(defn third [c]
+  (nth c 2))
+
 (defn parse-jump [s]
   (condp = s
 	"" "000"
@@ -73,7 +76,7 @@
 (swap! variable-allocation-counter inc)
 
 (defn parse-cinstruction [& s]
-  (str "111"(apply str s )))
+  (str "111"(apply str [(second s) (first s) (third s)] )))
 
 (def whitespace
   (insta/parser
