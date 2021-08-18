@@ -1,7 +1,5 @@
 (ns assembler.clj
-  (:require [instaparse.core :as insta]
-			[superstring.core :as str]
-			)
+  (:require [instaparse.core :as insta] [superstring.core :as str])
   (:gen-class))
 
 (def symbol-map (atom {}))
@@ -12,62 +10,24 @@
 
 (defn parse-jump [s]
   (condp = s
-	"" "000"
-	"JGT" "001"
-	"JEQ" "010"
-	"JGE" "011"
-	"JLT" "100"
-	"JNE" "101"
-	"JLE" "110"
-	"JMP" "111"))
+	"" "000" "JGT" "001" "JEQ" "010" "JGE" "011" "JLT" "100" "JNE" "101" "JLE" "110" "JMP" "111"))
 
 (defn parse-dest [s]
   (condp = s
-	"" "000"
-	"M" "001"
-	"D" "010"
-	"MD" "011"
-	"A" "100"
-	"AM" "101"
-	"AD" "110"
-	"AMD" 111))
+	"" "000" "M" "001" "D" "010" "MD" "011" "A" "100" "AM" "101" "AD" "110" "AMD" 111))
 
 (defn parse-comp [s]
   (condp = s
-	"0" "0101010"
-	"1" "0111111"
-	"-1" "0111010"
-	"D" "0001100"
-	"A" "0110000"
-	"!D" "0001100"
-	"!A" "0110001"
-	"-D" "0001111"
-	"-A" "0110011"
-	"D+1" "0011111"
-	"A+1" "0110111"
-	"D-1" "0001110"
-	"A-1" "0110010"
-	"D+A" "0000010"
-	"D-A" "0010011"
-	"A-D" "0 000111"
-	"D&A" "0000000"
-	"D|A" "0010101"
-	"M" "1110000"
-	"!M" "1110001"
-	"-M" "1110011"
-	"M+1" "1110111"
-	"M-1" "1110010"
-	"D+M" "1000010"
-	"D-M" "1010011"
-	"M-D" "1000111"
-	"D&M" "1000000"
-	"D|M" "1010101"))
+	"0" "0101010" "1" "0111111" "-1" "0111010" "D" "0001100" "A" "0110000" "!D" "0001100" "!A" "0110001"
+	"-D" "0001111" "-A" "0110011" "D+1" "0011111" "A+1" "0110111" "D-1" "0001110" "A-1" "0110010"
+	"D+A" "0000010" "D-A" "0010011" "A-D" "0 000111" "D&A" "0000000" "D|A" "0010101" "M" "1110000"
+	"!M" "1110001" "-M" "1110011" "M+1" "1110111" "M-1" "1110010" "D+M" "1000010"
+	"D-M" "1010011" "M-D" "1000111" "D&M" "1000000" "D|M" "1010101"))
 
 ;; TODO CHECK THAT SIZE IS IN RANGE
 (defn parse-literal-ainstruction
   "Convert decimal addresses to zero padded binary addresses 16 characters wide."
-  [s]
-  (str/pad-left (Integer/toBinaryString (Integer. s)) 16 "0"))
+  [s] (str/pad-left (Integer/toBinaryString (Integer. s)) 16 "0"))
 
 (defn parse-symbolic-ainstruction 
   "If s isn't already in symbol-map add it and inc variable-allocation-counter
@@ -103,10 +63,6 @@ which is DEST = COMP;JUMP"
 					"KBD" 24576
 					})
 
-;; Instructions are zero indexed and set the result of  increasing the counter
-;; thus if the first line is a label the first real line will be the following line
-;; which will be at zero.
-  
   (reset! instruction-counter -1)
   (reset! variable-allocation-counter 16)
   (insta/transform {
@@ -116,8 +72,7 @@ which is DEST = COMP;JUMP"
 											  `[:CINSTRUCTION-COMPLETE ~@x [:JUMP ""]])
 
 					:CINSTRUCTION-SANS-DEST (fn [& x]
-											  `[:CINSTRUCTION-COMPLETE [:DEST ""] ~@x ])
-					}
+											  `[:CINSTRUCTION-COMPLETE [:DEST ""] ~@x ])}
 		parse-tree))
 
 (defn transform-nodes [parse-tree]
@@ -129,8 +84,7 @@ which is DEST = COMP;JUMP"
 					:COMP parse-comp
 					:JUMP parse-jump
 					}
-				   parse-tree
-				   ))
+				   parse-tree))
 
 (defn process-file [filename]
   (->>(parse-file filename)
