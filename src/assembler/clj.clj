@@ -4,17 +4,11 @@
 			)
   (:gen-class))
 
-;; TODO merge label-map and variable-map and re-figure how the
-;; counter variables are initialized and implemented to ensure that we are
-;; free of off by one errors
-
-(def label-map (atom {}))
-(def variable-map (atom {}))
+(def symbol-map (atom {}))
 (def instruction-counter (atom 0))
 (def variable-allocation-counter (atom 0))
 
-(defn third [c]
-  (nth c 2))
+(defn third [c] (nth c 2))
 
 (defn parse-jump [s]
   (condp = s
@@ -70,24 +64,25 @@
 	"D|M" "1010101"))
 
 ;; TODO CHECK THAT SIZE IS IN RANGE
-(defn parse-literal-ainstruction [s]
+(defn parse-literal-ainstruction
+  "Convert decimal addresses to zero padded binary addresses 16 characters wide."
+  [s]
   (str/pad-left (Integer/toBinaryString (Integer. s)) 16 "0"))
 
-(defn parse-symbolic-aistruction [s]
-  (if-let [instruction-number (@label-map s) ]
-	(parse-literal-ainstruction instruction-number)
-	(if-let [instruction-number (@variable-map s)]
-	  (parse-literal-ainstruction instruction-number)
-	  (do
-	  ;; Add to variable map so its found next time
-		(swap! variable-allocation-counter inc)
-		(swap! variable-map (fn [x](assoc x s @variable-allocation-counter )))
-		(parse-literal-ainstruction(@variable-map s))
-		))))
-
-(swap! variable-allocation-counter inc)
+(defn parse-symbolic-ainstruction 
+  "If s isn't already in symbol-map add it and inc variable-allocation-counter
+used to assign symbolic variables not corresponding to labels to addresses
+starting at 16."
+  [s]
+  (if-not (some? (@symbol-map s))
+	(do
+	  (swap! symbol-map (fn [x](assoc x s @variable-allocation-counter )))
+	  (swap! variable-allocation-counter inc)))
+  (parse-literal-ainstruction (@symbol-map s)))
 
 (defn parse-cinstruction [& s]
+  "C Instructions are meant to be 111 COMP DEST JUMP rather than the natural order of the code
+which is DEST = COMP;JUMP"
   (str "111"(apply str [(second s) (first s) (third s)] )))
 
 (def whitespace
@@ -102,17 +97,21 @@
   (asm-parser (slurp filename)))
 
 (defn build-label-map-and-preprocess [parse-tree]
-  (reset! label-map {})
-  (reset! variable-map {"R0" 0 "R1" 1 "R2" 2 "R3" 3 "R4" 4 "R5" 5 "R6" 6 "R7" 7 "R8" 8
+  (reset! symbol-map {"R0" 0 "R1" 1 "R2" 2 "R3" 3 "R4" 4 "R5" 5 "R6" 6 "R7" 7 "R8" 8
 					"R9" 9 "R10" 10 "R11" 11 "R12" 12 "R13" 13 "R14" 14 "R15" 15
 					"SCREEN" 16384
 					"KBD" 24576
 					})
+
+;; Instructions are zero indexed and set the result of  increasing the counter
+;; thus if the first line is a label the first real line will be the following line
+;; which will be at zero.
+  
   (reset! instruction-counter -1)
-  (reset! variable-allocation-counter 15)
+  (reset! variable-allocation-counter 16)
   (insta/transform {
 		:INSTRUCTION (fn [x] (swap! instruction-counter inc) x)
-		:LABEL (fn [x] (swap! label-map #(assoc % x (inc @instruction-counter))) nil )
+		:LABEL (fn [x] (swap! symbol-map #(assoc % x (inc @instruction-counter))) nil )
 					:CINSTRUCTION-SANS-JUMP (fn [& x]
 											  `[:CINSTRUCTION-COMPLETE ~@x [:JUMP ""]])
 
@@ -124,7 +123,7 @@
 (defn transform-nodes [parse-tree]
   (insta/transform {
 					:AINSTRUCTION-LITERAL parse-literal-ainstruction
-					:AINSTRUCTION-SYMBOLIC parse-symbolic-aistruction
+					:AINSTRUCTION-SYMBOLIC parse-symbolic-ainstruction
 					:CINSTRUCTION-COMPLETE parse-cinstruction
 					:DEST parse-dest
 					:COMP parse-comp
@@ -133,18 +132,12 @@
 				   parse-tree
 				   ))
 
-(->>(parse-file  "/usr/home/michael/proj/clojure/assembler.clj/fake.asm")
-   ;; (build-label-map-and-preprocess)
-   ;; (filter identity)
-   ;; (transform-nodes)
-   ;; (str/join "\n")
-   ;; (spit "out.hack")
-   )
+(defn process-file [filename]
+  (->>(parse-file filename)
+	  (build-label-map-and-preprocess)
+	  (filter identity)
+	  (transform-nodes)
+	  (str/join "\n")
+	  (spit "out.hack")))
 
-;; (->>(parse-file  "/usr/home/michael/proj/nand2tetris/projects/04/Mult.asm")
-;;    (build-label-map-and-preprocess)
-;;    (filter identity)
-;;    (transform-nodes)
-;;    ;; (str/join "\n")
-;;    ;; (spit "out.hack")
-;;    )
+(process-file"/usr/home/michael/proj/clojure/assembler.clj/fake.asm")

@@ -18,6 +18,6 @@ CINSTRUCTION-SANS-DEST = COMP <";"> JUMP;
 
 <COMMENT> = <#"//.*">
 
-LABEL = <"("> #"[a-zA-Z_-]+" <")">
+LABEL = <"("> #"[a-zA-Z _-]+" <")">
 
 <NL> = <#"\n"> | <#"\r\n">
