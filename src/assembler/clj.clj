@@ -4,12 +4,14 @@
 			)
   (:gen-class))
 
-
+;; TODO merge label-map and variable-map and re-figure how the
+;; counter variables are initialized and implemented to ensure that we are
+;; free of off by one errors
 
 (def label-map (atom {}))
 (def variable-map (atom {}))
-(def counter (atom -1))
-(def variable-allocation-counter (atom 15))
+(def instruction-counter (atom 0))
+(def variable-allocation-counter (atom 0))
 
 (defn third [c]
   (nth c 2))
@@ -78,7 +80,8 @@
 	  (parse-literal-ainstruction instruction-number)
 	  (do
 	  ;; Add to variable map so its found next time
-		(swap! variable-map (fn [x](assoc x s (swap! variable-allocation-counter inc) )))
+		(swap! variable-allocation-counter inc)
+		(swap! variable-map (fn [x](assoc x s @variable-allocation-counter )))
 		(parse-literal-ainstruction(@variable-map s))
 		))))
 
@@ -105,11 +108,11 @@
 					"SCREEN" 16384
 					"KBD" 24576
 					})
-  (reset! counter -1)
+  (reset! instruction-counter -1)
   (reset! variable-allocation-counter 15)
   (insta/transform {
-		:INSTRUCTION (fn [x] (swap! counter inc) x)
-		:LABEL (fn [x] (swap! label-map #(assoc % x (inc @counter))) nil )
+		:INSTRUCTION (fn [x] (swap! instruction-counter inc) x)
+		:LABEL (fn [x] (swap! label-map #(assoc % x (inc @instruction-counter))) nil )
 					:CINSTRUCTION-SANS-JUMP (fn [& x]
 											  `[:CINSTRUCTION-COMPLETE ~@x [:JUMP ""]])
 
@@ -131,11 +134,11 @@
 				   ))
 
 (->>(parse-file  "/usr/home/michael/proj/clojure/assembler.clj/fake.asm")
-   (build-label-map-and-preprocess)
-   (filter identity)
-   (transform-nodes)
-   (str/join "\n")
-   (spit "out.hack")
+   ;; (build-label-map-and-preprocess)
+   ;; (filter identity)
+   ;; (transform-nodes)
+   ;; (str/join "\n")
+   ;; (spit "out.hack")
    )
 
 ;; (->>(parse-file  "/usr/home/michael/proj/nand2tetris/projects/04/Mult.asm")
