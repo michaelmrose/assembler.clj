@@ -31,8 +31,8 @@
 
 (defn parse-symbolic-ainstruction 
   "If s isn't already in symbol-map add it and inc variable-allocation-counter
-used to assign symbolic variables not corresponding to labels to addresses
-starting at 16."
+  used to assign symbolic variables not corresponding to labels to addresses
+  starting at 16."
   [s]
   (if-not (some? (@symbol-map s))
 	(do
@@ -58,22 +58,21 @@ which is DEST = COMP;JUMP"
 
 (defn build-label-map-and-preprocess [parse-tree]
   (reset! symbol-map {"R0" 0 "R1" 1 "R2" 2 "R3" 3 "R4" 4 "R5" 5 "R6" 6 "R7" 7 "R8" 8
-					"R9" 9 "R10" 10 "R11" 11 "R12" 12 "R13" 13 "R14" 14 "R15" 15
-					"SCREEN" 16384
-					"KBD" 24576
-					})
+					  "R9" 9 "R10" 10 "R11" 11 "R12" 12 "R13" 13 "R14" 14 "R15" 15
+					  "SCREEN" 16384
+					  "KBD" 24576})
 
   (reset! instruction-counter -1)
   (reset! variable-allocation-counter 16)
   (insta/transform {
-		:INSTRUCTION (fn [x] (swap! instruction-counter inc) x)
-		:LABEL (fn [x] (swap! symbol-map #(assoc % x (inc @instruction-counter))) nil )
+					:INSTRUCTION (fn [x] (swap! instruction-counter inc) x)
+					:LABEL (fn [x] (swap! symbol-map #(assoc % x (inc @instruction-counter))) nil )
 					:CINSTRUCTION-SANS-JUMP (fn [& x]
 											  `[:CINSTRUCTION-COMPLETE ~@x [:JUMP ""]])
 
 					:CINSTRUCTION-SANS-DEST (fn [& x]
 											  `[:CINSTRUCTION-COMPLETE [:DEST ""] ~@x ])}
-		parse-tree))
+				   parse-tree))
 
 (defn transform-nodes [parse-tree]
   (insta/transform {
