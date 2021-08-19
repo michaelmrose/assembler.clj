@@ -40,7 +40,8 @@
 
   (reset! instruction-counter -1)
   (reset! variable-allocation-counter 16)
-  (insta/transform {:INSTRUCTION (fn [x] (swap! instruction-counter inc) x)
+  (insta/transform {
+		    :INSTRUCTION (fn [x] (swap! instruction-counter inc) x)
 		    :LABEL (fn [x] (swap! symbol-map #(assoc % x (inc @instruction-counter))) nil)
 		    :CINSTRUCTION-SANS-JUMP (fn [& x]
 					      `[:CINSTRUCTION-COMPLETE ~@x [:JUMP ""]])
