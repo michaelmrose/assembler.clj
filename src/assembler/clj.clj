@@ -51,7 +51,7 @@
 		   parse-tree))
 
 (defn transform-nodes [parse-tree]
-  (insta/transform {:AINSTRUCTION-LITERAL (fn [s] (str/pad-left (Integer/toBinaryString (Integer. s)) 16 "0"))
+  (insta/transform {:AINSTRUCTION-LITERAL parse-literal-ainstruction
 		    :AINSTRUCTION-SYMBOLIC parse-symbolic-ainstruction
 		    :CINSTRUCTION-COMPLETE (fn [& s] (str "111" (apply str [(second s) (first s) (third s)])))
 		    :DEST (fn [s] (condp = s "" "000" "M" "001" "D" "010" "MD" "011" "A" "100" "AM" "101" "AD" "110" "AMD" 111))
