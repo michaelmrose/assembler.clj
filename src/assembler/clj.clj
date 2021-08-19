@@ -71,6 +71,8 @@
        (filter identity)
        (transform-nodes)
        (str/join "\n")
-       (spit "out.hack")))
+       (spit (str(basename filename) ".hack"))))
 
-(parse-file "/usr/home/michael/proj/clojure/assembler.clj/fake.asm")
+
+(defn -main [& args]
+  (parse-file(first *command-line-args*)))
