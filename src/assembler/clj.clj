@@ -1,5 +1,5 @@
 (ns assembler.clj
-  (:require [instaparse.core :as insta] [superstring.core :as str])
+  (:require [instaparse.core :as insta] [superstring.core :as str][babashka.fs :as fs])
   (:gen-class))
 (def symbol-map (atom {}))
 (def instruction-counter (atom 0))
