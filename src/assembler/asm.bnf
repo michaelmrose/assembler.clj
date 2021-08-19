@@ -16,6 +16,8 @@ CINSTRUCTION-SANS-DEST = COMP <";"> JUMP;
 
 	COMP = "0" | "1" | "-1"  | "!M" | "-M"| "M+1" | "M-1" | "!D" | "-D" | "D+1" | "D-1" | "!A" | "-A" | "A+1" | "A-1" |  "D+A" | "D-A" |"A-D" | "D&A" | "D|A" | "D+M" | "D-M" | "M-D" | "D&M" | "D|M"| "M" | "A" | "D"
 
+
+
 <COMMENT> = <#"//.*">
 
 LABEL = <"("> #"[a-zA-Z _-]+" <")">
