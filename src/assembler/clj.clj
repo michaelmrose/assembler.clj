@@ -7,9 +7,16 @@
 
 (defn third [c] (nth c 2))
 
+(defn basename [fname]
+  (let [filename (fs/file-name fname)]
+    (subs filename  0 (str/last-index-of filename "."))))
+
 (defn add-entry-to-symbol-map [k]
   (swap! symbol-map (fn [x] (assoc x k @variable-allocation-counter)))
   (swap! variable-allocation-counter inc))
+
+(defn parse-literal-ainstruction [s]
+  (str/pad-left (Integer/toBinaryString (Integer. s)) 16 "0"))
 
 (defn parse-symbolic-ainstruction
   "If s isn't already in symbol-map add it and inc variable-allocation-counter
